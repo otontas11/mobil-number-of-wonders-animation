@@ -3,8 +3,8 @@ import { defineStore } from 'pinia'
 
 import { CFG, EMBED, TOTAL_QUESTIONS } from '@/config'
 import * as sfx from '@/audio/sfx'
-import { sendToNative } from '@/native/bridge'
-import { bubbleFor, HUG_BUBBLE, questionLabelFor, signFor, WRONG_BUBBLE } from './messages'
+import { sendToNative, type ReplayEvent, type ReplayOptions } from '@/native/bridge'
+import { bubbleFor, HINT_BUBBLE, HUG_BUBBLE, questionLabelFor, signFor, WRONG_BUBBLE } from './messages'
 import { isCorrectPair, newQuestion, type Question } from './questions'
 import { TL } from './timeline'
 import type { SceneHandle } from './types'
@@ -49,6 +49,7 @@ export const useGameStore = defineStore('game', () => {
   let bubbleTimer = 0
   let nextTimer = 0
   let wrongTimer = 0
+  let replayTimer = 0
 
   function attachScene(s: SceneHandle | null) {
     scene = s
@@ -63,6 +64,7 @@ export const useGameStore = defineStore('game', () => {
     clearTimeout(bubbleTimer)
     clearTimeout(nextTimer)
     clearTimeout(wrongTimer)
+    clearTimeout(replayTimer)
   }
 
   function nextQuestion() {
@@ -119,6 +121,38 @@ export const useGameStore = defineStore('game', () => {
     }, 1500)
   }
 
+  // Native tarafta ipucu alındı: kaşif köprüyü işaret eder (doküman §12.2).
+  function onHint() {
+    if (status.value !== 'playing') return
+    scene?.hint()
+    sfx.tap()
+    bubble.value = HINT_BUBBLE
+    clearTimeout(bubbleTimer)
+    bubbleTimer = window.setTimeout(() => {
+      if (status.value === 'playing') bubble.value = bubbleFor(solved.value)
+    }, TL.HINT_BUBBLE_MS)
+  }
+
+  /**
+   * Native'in biriktirdiği döngüyü sahnede oynatır: sıfırla, sonra olayları
+   * sırayla uygula. Ödül ekranı sahneyi oyun sırasında göstermediği için
+   * tahtalar, yanlış denemeler ve ipuçları burada hikâye olarak akar.
+   */
+  function replay(events: readonly ReplayEvent[], options: ReplayOptions = {}) {
+    start()
+    const stagger = Math.max(120, options.stagger ?? 420)
+    const startDelay = Math.max(0, options.startDelay ?? 500)
+    let index = 0
+    const step = () => {
+      const event = events[index++]
+      if (event === 'correct') onCorrect()
+      else if (event === 'wrong') onWrong()
+      else if (event === 'hint') onHint()
+      if (index < events.length) replayTimer = window.setTimeout(step, stagger)
+    }
+    if (events.length > 0) replayTimer = window.setTimeout(step, startDelay)
+  }
+
   // Doküman §4.3 seçim ve doğrulama
   function pick(k: number) {
     const q = question.value
@@ -151,6 +185,8 @@ export const useGameStore = defineStore('game', () => {
 
   function showFinale() {
     finaleVisible.value = true
+    // native taraf "Devam" düğmesini bu olayla açar (doküman §12.1)
+    sendToNative('finale')
   }
 
   function setMuted(v: boolean) {
@@ -162,6 +198,6 @@ export const useGameStore = defineStore('game', () => {
     solved, placed, status, question, picked, resolution,
     bubble, sign, signPulse, ringShake, finaleVisible, muted,
     isKeyQuestion, questionLabel, unlocked, inputLocked, equation,
-    attachScene, start, pick, onCorrect, onWrong, onHug, showFinale, setMuted,
+    attachScene, start, pick, onCorrect, onWrong, onHint, replay, onHug, showFinale, setMuted,
   }
 })

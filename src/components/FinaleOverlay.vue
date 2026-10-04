@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue'
+import { EMBED } from '@/config'
 import { FINALE_TITLE } from '@/game/messages'
 import { useGameStore } from '@/game/state'
 
@@ -20,7 +21,10 @@ watch(
 <template>
   <div v-if="game.finaleVisible" class="finale">
     <div class="woodsign">{{ FINALE_TITLE }}</div>
-    <button ref="again" type="button" class="btn" @click="game.start()">Tekrar oyna</button>
+    <!-- gömülü modda devam/tekrar kararını native ekran verir (doküman §12.3) -->
+    <button v-if="!EMBED" ref="again" type="button" class="btn" @click="game.start()">
+      Tekrar oyna
+    </button>
   </div>
 </template>
 

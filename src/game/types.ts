@@ -6,6 +6,8 @@ export interface SceneHandle {
   addPlank(index: number): void
   cheer(): void
   sad(): void
+  /** İpucu alındı: kaşif köprüyü işaret eder (doküman §12.2). */
+  hint(): void
   startRescue(): void
 }
 

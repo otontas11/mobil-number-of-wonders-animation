@@ -4,6 +4,7 @@ import { CFG } from '@/config'
 const CHEERS = ['Bir tahta daha!', 'Harika gidiyoruz!', 'Süpersin!', 'Devam, devam!', 'Çok iyi!']
 
 export const WRONG_BUBBLE = 'Hmm, bir daha deneyelim!'
+export const HINT_BUBBLE = 'Bak, yol şurada!'
 export const HUG_BUBBLE = 'Kavuştuk! Seni çok özledim!'
 export const FINALE_TITLE = '9 Soru, 1 Mutlu Son! 🐾'
 

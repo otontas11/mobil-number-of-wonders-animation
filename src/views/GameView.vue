@@ -6,10 +6,10 @@ import FinaleOverlay from '@/components/FinaleOverlay.vue'
 import Hud from '@/components/Hud.vue'
 import PuzzleTablet from '@/components/PuzzleTablet.vue'
 import SpeechBubble from '@/components/SpeechBubble.vue'
-import { CFG, EMBED, REDUCE_MOTION } from '@/config'
+import { CFG, EMBED, REDUCE_MOTION, SHOW_CHROME, TOTAL_QUESTIONS } from '@/config'
 import { useGameStore } from '@/game/state'
 import type { SceneEvent } from '@/game/types'
-import { installRescueApi } from '@/native/bridge'
+import { installRescueApi, sendToNative } from '@/native/bridge'
 import { GameScene } from '@/scene/GameScene'
 
 const game = useGameStore()
@@ -61,17 +61,27 @@ onMounted(() => {
   scene = new GameScene(stageEl.value!, game)
   scene.on(onSceneEvent)
   game.attachScene(scene)
-  game.start()
   window.addEventListener('pointerdown', unlockAudio, { passive: true })
+  // API, ilk start()'tan önce kurulur: native 'ready' mesajını aldığında
+  // window.rescue çağrılabilir durumdadır (doküman §12.2).
   uninstallApi = installRescueApi({
     start: () => game.start(),
     onCorrect: () => game.onCorrect(),
     onWrong: () => game.onWrong(),
+    onHint: () => game.onHint(),
+    replay: (events, options) => game.replay(events, options),
     setMuted: (v) => game.setMuted(v),
     get state() {
       return { solved: game.solved, placed: game.placed, status: game.status }
     },
     config: CFG,
+  })
+  game.start()
+  sendToNative('ready', {
+    planks: CFG.planks,
+    total: TOTAL_QUESTIONS,
+    embed: EMBED,
+    chrome: SHOW_CHROME,
   })
 })
 
@@ -87,15 +97,18 @@ onBeforeUnmount(() => {
 <template>
   <div class="app" :class="{ embed: EMBED }">
     <div ref="stageEl" class="stage">
-      <Hud />
-      <SpeechBubble />
+      <!-- arka plan modunda metinleri native oyun gösterir; sahne saf 3B kalır -->
+      <template v-if="SHOW_CHROME">
+        <Hud />
+        <SpeechBubble />
+      </template>
       <span
         v-for="h in hearts"
         :key="h.id"
         class="heart"
         :style="{ left: `${h.x}px`, top: `${h.y}px`, '--dx': `${h.dx}px`, animationDelay: `${h.delay}s` }"
       >❤️</span>
-      <FinaleOverlay />
+      <FinaleOverlay v-if="SHOW_CHROME" />
     </div>
     <!-- gömülü modda (?embed=1) soruları native uygulama gösterir -->
     <PuzzleTablet v-if="!EMBED" />

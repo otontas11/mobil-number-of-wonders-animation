@@ -12,7 +12,21 @@ export const CFG = {
 
 export const TOTAL_QUESTIONS = CFG.planks + 1
 
-export const EMBED = new URLSearchParams(location.search).has('embed')
+/**
+ * Gömülü mod (doküman §12.3). Tarayıcıda `?embed=1`; native WebView'da sayfa
+ * `file://` üzerinden açıldığı için sorgu dizesi her platformda güvenilir
+ * değil — orada içerik yüklenmeden önce `window.RESCUE_EMBED` enjekte edilir.
+ */
+export const EMBED =
+  new URLSearchParams(location.search).has('embed') || window.RESCUE_EMBED === true
+
+/**
+ * Sahnenin kendi arayüzü (HUD, tabela, balon, final) gösterilsin mi?
+ * Native oyun sahneyi kendi arayüzünün arkasında arka plan olarak çalıştırdığında
+ * kapatılır: ekranda yalnız 3B sahne kalır, metinleri oyun gösterir.
+ */
+export const SHOW_CHROME =
+  window.RESCUE_CHROME !== false && !new URLSearchParams(location.search).has('nochrome')
 
 export const REDUCE_MOTION =
   typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches

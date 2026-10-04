@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CFG } from '@/config'
+import { CFG, EMBED } from '@/config'
 import { useGameStore } from '@/game/state'
 
 const game = useGameStore()
@@ -7,7 +7,9 @@ const game = useGameStore()
 
 <template>
   <div class="hud">
-    <div class="woodsign qLabel">{{ game.questionLabel }}</div>
+    <!-- gömülü modda soruyu native sorar; soru etiketi burada yanıltıcı olur -->
+    <div v-if="!EMBED" class="woodsign qLabel">{{ game.questionLabel }}</div>
+    <span v-else />
     <div class="right">
       <div class="prog" aria-label="İlerleme">
         <span v-for="i in CFG.planks" :key="i" class="pl" :class="{ on: i <= game.placed }" />

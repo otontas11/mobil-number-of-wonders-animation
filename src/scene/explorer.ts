@@ -103,7 +103,7 @@ export function resetExplorer(O: ExplorerRig) {
 
 /** Kaşif davranışları (doküman §7.2). */
 export function updateExplorer(O: ExplorerRig, c: FrameCtx) {
-  const { t, dt, rescued, rt, hugging, cheerT, walk } = c
+  const { t, dt, rescued, rt, hugging, cheerT, hintT, walk } = c
   O.blink -= dt
   if (O.blink < -0.13) O.blink = 2.5 + Math.random() * 3
   O.eyes.forEach((e) => (e.scale.y = lerp(e.scale.y, hugging ? 0.3 : O.blink < 0 ? 0.1 : 1, 0.45)))
@@ -113,15 +113,21 @@ export function updateExplorer(O: ExplorerRig, c: FrameCtx) {
     const watching = rescued
     const hop = cheer ? Math.abs(Math.sin(t * 9)) * 0.16 : 0
     O.root.position.set(OWNER_HOME.x, OWNER_HOME.y + hop, OWNER_HOME.z)
+    // ipucu: köprüye sabit dönüp kolunu uzatarak yolu gösterir (doküman §12.2)
+    const pointing = hintT > 0 && !cheer && !watching
     // normalde köprüye bakar; sevinirken oyuncuya döner
-    const face = cheer && !watching ? -0.9 : watching ? 1.1 : 1.25 + Math.sin(t * 0.4) * 0.15
-    O.root.rotation.y = lerp(O.root.rotation.y, face, 0.08)
-    const wave = !cheer && !watching && Math.sin(t * 0.7) > 0.55
-    O.arms[1]!.rotation.x = lerp(O.arms[1]!.rotation.x, 0, 0.15)
-    O.arms[1]!.rotation.z = lerp(O.arms[1]!.rotation.z, cheer ? 2.7 : wave ? 2.5 + Math.sin(t * 10) * 0.35 : 0.2, 0.15)
+    const face = cheer && !watching ? -0.9 : watching ? 1.1 : pointing ? 1.25 : 1.25 + Math.sin(t * 0.4) * 0.15
+    O.root.rotation.y = lerp(O.root.rotation.y, face, pointing ? 0.14 : 0.08)
+    const wave = !cheer && !watching && !pointing && Math.sin(t * 0.7) > 0.55
+    O.arms[1]!.rotation.x = lerp(O.arms[1]!.rotation.x, pointing ? -1.45 + Math.sin(t * 7) * 0.12 : 0, 0.15)
+    O.arms[1]!.rotation.z = lerp(
+      O.arms[1]!.rotation.z,
+      cheer ? 2.7 : pointing ? 0.42 : wave ? 2.5 + Math.sin(t * 10) * 0.35 : 0.2,
+      0.15,
+    )
     O.arms[0]!.rotation.x = lerp(O.arms[0]!.rotation.x, watching ? -1 : 0, 0.15)
     O.arms[0]!.rotation.z = lerp(O.arms[0]!.rotation.z, cheer ? -2.7 : watching ? 0.3 : -0.2, 0.15)
-    O.head.rotation.z = lerp(O.head.rotation.z, wave ? 0.12 : 0, 0.1)
+    O.head.rotation.z = lerp(O.head.rotation.z, wave ? 0.12 : pointing ? -0.1 : 0, 0.1)
     O.root.rotation.x = 0
     O.smile.scale.set(cheer || watching ? 1.3 : 1, cheer || watching ? 1.25 : 1, 1)
   } else {

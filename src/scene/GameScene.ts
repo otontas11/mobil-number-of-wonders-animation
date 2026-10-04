@@ -47,6 +47,7 @@ export class GameScene implements SceneHandle {
   private rescueT = 0
   private cheerT = 0
   private sadT = 0
+  private hintT = 0
   private wobbleT = 0
   private lastStep = 0
   private fired = new Set<string>()
@@ -118,7 +119,7 @@ export class GameScene implements SceneHandle {
 
   reset() {
     this.rescued = false
-    this.rescueT = this.cheerT = this.sadT = this.wobbleT = 0
+    this.rescueT = this.cheerT = this.sadT = this.hintT = this.wobbleT = 0
     this.fired.clear()
     resetBridge(this.bridge)
     resetCage(this.cage)
@@ -138,6 +139,10 @@ export class GameScene implements SceneHandle {
   sad() {
     this.sadT = 1.1
     this.wobbleT = 0.5
+  }
+
+  hint() {
+    this.hintT = TL.HINT
   }
 
   startRescue() {
@@ -180,6 +185,7 @@ export class GameScene implements SceneHandle {
     if (this.rescued) this.rescueT += dt
     this.cheerT = Math.max(0, this.cheerT - dt)
     this.sadT = Math.max(0, this.sadT - dt)
+    this.hintT = Math.max(0, this.hintT - dt)
     this.wobbleT = Math.max(0, this.wobbleT - dt)
 
     const rt = this.rescueT
@@ -194,6 +200,7 @@ export class GameScene implements SceneHandle {
       t, dt, rescued, rt, keyPhase, hugging,
       cheerT: this.cheerT,
       sadT: this.sadT,
+      hintT: this.hintT,
       prog: this.src.placed / N_PLANKS,
       walk: { curve: this.walkCurve, start: TL.WALK_START, dur: this.walkDur },
     }

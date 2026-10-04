@@ -9,6 +9,8 @@ export const TL = {
   STEP_INTERVAL: 0.21, // yürüyüşte ayak sesi aralığı
   FINALE_AFTER_HUG: 2.4, // sarılmadan final ekranına
   MAGIC_DELAY_MS: 700, // köprü tamamlanınca "magic" sesi gecikmesi
+  HINT: 1.8, // ipucu tepkisi: kaşif köprüyü işaret eder (doküman §12.2)
+  HINT_BUBBLE_MS: 1800, // ipucu balonunun ekranda kalma süresi
 } as const
 
 // Tahta ekleme (doküman §6.1)

@@ -10,6 +10,7 @@ export interface FrameCtx {
   hugging: boolean
   cheerT: number
   sadT: number
+  hintT: number // ipucu tepkisi kalan süre (native köprü, doküman §12.2)
   prog: number // yerleşmiş tahta oranı 0–1
   walk: { curve: THREE.CatmullRomCurve3; start: number; dur: number }
 }
