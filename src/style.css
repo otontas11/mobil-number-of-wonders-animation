@@ -1,0 +1,65 @@
+@import 'tailwindcss';
+
+/* Oyun teması — tahta tabela, taş tablet, altın vurgu */
+:root {
+  --page: #21452b;
+  --page2: #173320;
+  --wood: #8a5a32;
+  --wood-dark: #5e3a1d;
+  --wood-light: #a8723f;
+  --sign: #f6e3bd;
+  --sign-ink: #3d2612;
+  --navy: #22406b;
+  --navy-dark: #162a48;
+  --gold: #ffd447;
+  --gold-dark: #c99a12;
+  --bad: #e0574f;
+  /* çentikli ekranlar */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --page: #13281a;
+    --page2: #0c1a10;
+    --sign: #ead3a6;
+  }
+}
+:root[data-theme='dark'] {
+  --page: #13281a;
+  --page2: #0c1a10;
+  --sign: #ead3a6;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+body {
+  margin: 0;
+  overflow: hidden;
+  background: radial-gradient(120% 80% at 50% 0%, var(--page) 0%, var(--page2) 100%);
+  background-color: var(--page2);
+  font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  color: #fff;
+  /* WebView ayarları (doküman §12.6) */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  overscroll-behavior: none;
+}
+
+/* Tahta tabela — birden fazla bileşende kullanılıyor */
+.woodsign {
+  display: inline-block;
+  background: linear-gradient(180deg, var(--wood-light), var(--wood));
+  color: var(--sign);
+  font-weight: 800;
+  line-height: 1;
+  padding: 7px 14px 4px;
+  border-radius: 12px;
+  box-shadow: inset 0 -4px 0 var(--wood-dark), inset 0 2px 0 rgba(255, 255, 255, 0.18), 0 4px 0 rgba(0, 0, 0, 0.28);
+  text-shadow: 0 2px 0 var(--wood-dark);
+}
